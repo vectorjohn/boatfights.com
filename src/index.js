@@ -5,7 +5,23 @@ import App from './App';
 import registerServiceWorker from './registerServiceWorker';
 import boats from './boats.json';
 
-const boat = boats[Math.floor(Math.random() * boats.length)];
+let boatIdx = Math.floor(Math.random() * boats.length),
+	boat = boats[boatIdx];
 
-ReactDOM.render(<App boat={boat}/>, document.getElementById('root'));
+function reRender() {
+	ReactDOM.render(<App boat={boat} onNext={() => changeboat(1)} onPrev={() => changeboat(-1)}/>, document.getElementById('root'));
+}
+
+function changeboat(dir) {
+	boatIdx += dir;
+	if (boatIdx >= boats.length) {
+		boatIdx = 0;
+	}
+	if (boatIdx < 0)
+		boatIdx = boats.length - 1;
+	boat = boats[boatIdx];
+	reRender();
+}
+
+reRender();
 registerServiceWorker();
