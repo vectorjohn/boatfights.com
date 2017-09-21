@@ -9,7 +9,7 @@ function App({boat}) {
           <h1>Boat Fights!</h1>
         </div>
         <p className="App-intro">
-		<img alt={boat.title} title={boat.title} src={boat.src} />
+		<img id="daboat" alt={boat.title} title={boat.title} src={boat.src} />
         </p>
       </div>
     );

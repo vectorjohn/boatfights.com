@@ -1,6 +1,6 @@
 [
   {
-    "title": "boatyslam",
+    "title": "boaty slam",
     "src": "boats/boatyslam.jpg"
   },
   {
@@ -8,11 +8,15 @@
     "src": "boats/sumo.jpg"
   },
   {
-    "title": "finishhim",
+    "title": "finish him",
     "src": "boats/finishhim.jpg"
   },
   {
-    "title": "headboat",
+    "title": "Century Pigeon",
+    "src": "boats/century_pigeon.jpg"
+  },
+  {
+    "title": "head boat",
     "src": "boats/headboat.jpg"
   }
 ]
