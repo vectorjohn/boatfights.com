@@ -1,21 +1,18 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React from 'react';
+//import logo from './logo.svg';
 import './App.css';
 
-class App extends Component {
-  render() {
+function App({boat}) {
     return (
       <div className="App">
         <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
+          <h1>Boat Fights!</h1>
         </div>
         <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
+		<img alt={boat.title} title={boat.title} src={boat.src} />
         </p>
       </div>
     );
-  }
 }
 
 export default App;
