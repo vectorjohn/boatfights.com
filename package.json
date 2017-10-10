@@ -2,7 +2,9 @@
   "name": "boatfights",
   "version": "0.1.0",
   "private": true,
+  "main": "server/main.js",
   "dependencies": {
+    "express": "^4.16.1",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-scripts": "1.0.13"
@@ -11,6 +13,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "build-container": "docker build -t boatfights src/server",
+    "build-serve": "yarn build && yarn build-container && echo DO SOMETHING USEFUL HERE",
+    "serve": "nodejs src/server/main.js"
   }
 }
