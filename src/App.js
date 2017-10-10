@@ -12,7 +12,7 @@ function App({boat, onNext, onPrev}) {
 		    <button onClick={onPrev}>&lt;</button>
 		    <button onClick={onNext}>&gt;</button>
 		    <br/>
-		<img id="daboat" alt={boat.title} title={boat.title} src={boat.src} />
+		<img id="daboat" alt={boat.title} title={boat.title} src={boat.path} />
         </p>
       </div>
     );
