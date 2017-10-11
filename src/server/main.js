@@ -25,6 +25,14 @@ app.get('/boats.json', function(req, res) {
 		}, errorHandler(res))
 });
 
+app.post('/rescan', function(req, res) {
+	boatdb.rescanDb(boatRoot)
+		.then((db) => res.json({
+			_meta: {
+				msg: "Boat database updated"
+			}
+		}));
+})
 app.get('/slfjlsjd/*', function (req, res) {
   res.sendFile(indexHtml)
 })
