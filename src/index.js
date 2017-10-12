@@ -3,14 +3,16 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import registerServiceWorker from './registerServiceWorker';
-//import boats from './boats.json';
+import mockBoats from './mocks/boats.json';
+
+const boatReq = process.env.NODE_ENV === 'development' ? Promise.resolve(mockBoats) 
+	: fetch('/boats.json').then((r)=>r.json())
 
 let boat = null,
 	boatIdx = 0,
 	boats = null;
 
-fetch('/boats.json')
-	.then((resp) => resp.json())
+boatReq
 	.then((json) => {
 		boats = json;
 		boatIdx = Math.floor(Math.random() * boats.images.length);
