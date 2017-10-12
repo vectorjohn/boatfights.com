@@ -1,20 +1,28 @@
 import {createStore, combineReducers, applyMiddleware} from 'redux';
-import {RECEIVE_BOATS} from './actions';
+import {RECEIVE_BOATS, RECEIVE_AUTH, AUTH_FAILURE} from './actions';
 
 function auth(cur = {}, action = {}) {
-  return cur;
+  switch (action.type) {
+    case RECEIVE_AUTH:
+      return Object.assign({}, action.payload, {isLoggedIn: true});
+    case AUTH_FAILURE:
+      return Object.assign({}, action.payload, {isLoggedIn: false});
+    default:
+      return cur;
+  }
 }
 
-function boats(cur = {}, action = {}) {
+function boats(cur = {all: []}, action = {}) {
   switch (action.type) {
     case RECEIVE_BOATS:
-
-      break;
+      return Object.assign({}, cur,
+        {all: action.payload.images});
     default:
-
+      return cur;
   }
 }
 
 export default createStore(combineReducers({
-  auth
+  auth,
+  boats
 }), applyMiddleware());
