@@ -1,5 +1,6 @@
 const path = require('path'),
 	fs = require('fs'),
+	crypto = require('crypto'),
 	readdir = require('recursive-readdir');
 
 const fileTypeRE = /\.(jpg|jpeg|png|gif)$/;
@@ -32,8 +33,52 @@ function writeDb(root, db) {
 	});
 }
 
-function readDb(root) {
+function addBoat(root, filePath, boatRecord) {
+	return Promise.all([hashAndLoadFile(filePath), readDb(root)])
+		.then(([{hash, data}, db]) => {
+			const newPath = [hash.substr(0, 2), hash.substr(2, 2), hash.substr(4)];
+			
+			newPath.reduce((acc, cur) => {
+				if (acc.length === 0) return [path.join(root, cur)];
+				return acc.concat([path.join(acc[acc.length-1], cur)]);
+			}, []).forEach((path) => {
+				try {
+					fs.mkdirSync(path);	
+				} catch (ex) {
+					if (ex.code !== 'EEXIST')
+						throw ex;
+				}
+			});
 
+			const dbPath = path.join.apply(path, newPath.concat(path.basename(filePath)));
+			const finalPath = path.join.apply(path, [root].concat(dbPath));
+			fs.writeFile(finalPath, data);
+			//fs.rename(filePath, finalPath)
+
+			const newRecord = Object.assign({}, boatRecord, {path: dbPath});
+			db.images.push(newRecord);
+			rescanDb(root);
+			return newRecord;
+		})
+}
+
+function hashAndLoadFile(path) {
+	const hash = crypto.createHash('sha1');
+	return new Promise((res, rej) => {
+		fs.readFile(path, (err, data) => {
+			if (err) {
+				rej(err);
+				return;
+			}
+			hash.update(data);
+			res({hash: hash.digest('hex'), data});
+		})
+	});
+}
+
+function readDb(root) {
+	return readDbAsJson(root)
+		.then(JSON.parse);
 }
 
 function getDbIndexPath(root) {
@@ -44,8 +89,7 @@ function rescanDb(root) {
 	const newDb = createEmptyDb();
 	const startTime = new Date();
 
-	return readDbAsJson(root)
-		.then(JSON.parse)
+	return readDb(root)
 		.then(function(db) {
 			return new Promise(function(res, rej) {
 				readdir(root, function(err, files) {
@@ -55,7 +99,7 @@ function rescanDb(root) {
 					}
 					res([db, files]);
 				})
-			})
+			});
 		})
 		.then(function([db, files]) {
 			const exBBP = boatsByPath(db);
@@ -94,5 +138,8 @@ function createBoat(path, name, title, description = null) {
 
 module.exports = {
 	readDbAsJson,
-	rescanDb
+	rescanDb,
+	addBoat,
+	writeDb,
+	createBoat
 }
