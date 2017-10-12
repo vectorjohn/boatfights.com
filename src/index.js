@@ -1,11 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import {Provider} from 'react-redux';
 import './index.css';
 import App from './App';
 import registerServiceWorker from './registerServiceWorker';
+import store from './store';
 import mockBoats from './mocks/boats.json';
 
-const boatReq = process.env.NODE_ENV === 'development' ? Promise.resolve(mockBoats) 
+const boatReq = process.env.NODE_ENV === 'development' ? Promise.resolve(mockBoats)
 	: fetch('/boats.json').then((r)=>r.json())
 
 let boat = null,
@@ -22,7 +24,10 @@ boatReq
 
 
 function reRender() {
-	ReactDOM.render(<App boat={boat} onNext={() => changeboat(1)} onPrev={() => changeboat(-1)}/>, document.getElementById('root'));
+	ReactDOM.render(
+		<Provider store={store}>
+			<App boat={boat} onNext={() => changeboat(1)} onPrev={() => changeboat(-1)}/>
+		</Provider>, document.getElementById('root'));
 }
 
 function changeboat(dir) {
