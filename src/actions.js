@@ -23,6 +23,22 @@ function authFailure(resp) {
   };
 }
 
+export const SET_CURRENT_BOAT = 'SET_CURRENT_BOAT';
+export function setCurrentBoat(path) {
+  return {
+    type: SET_CURRENT_BOAT,
+    payload: {path}
+  }
+}
+
+export const CHANGE_BOAT = 'CHANGE_BOAT';
+export function changeBoat(change) {
+  return {
+    type: CHANGE_BOAT,
+    payload: {change}
+  }
+}
+
 export function submitAuth(form) {
   return (dispatch) =>
     fetch('/login', {body: form})

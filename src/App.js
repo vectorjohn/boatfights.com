@@ -1,18 +1,18 @@
 import React from 'react';
-//import logo from './logo.svg';
+import BoatRotator from './components/BoatRotator';
+import hasCurrentBoat from './connectors/hasCurrentBoat';
 import './App.css';
 
-function App({boat, onNext, onPrev}) {
+const CurrentBoatRotator = hasCurrentBoat(BoatRotator);
+
+function App({onNext, onPrev}) {
     return (
       <div className="App">
         <div className="App-header">
           <h1>Boat Fights!</h1>
         </div>
         <p className="App-intro">
-		    <button onClick={onPrev}>&lt;</button>
-		    <button onClick={onNext}>&gt;</button>
-		    <br/>
-		<img id="daboat" alt={boat.title} title={boat.title} src={boat.path} />
+		      <CurrentBoatRotator />
         </p>
       </div>
     );
