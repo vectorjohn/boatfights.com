@@ -6,7 +6,8 @@ import {
   RECEIVE_AUTH,
   AUTH_FAILURE,
   SET_CURRENT_BOAT,
-  CHANGE_BOAT
+  CHANGE_BOAT,
+  NAV_SHOW_PAGE_STATE
 } from './actions';
 
 function auth(cur = {}, action = {}) {
@@ -28,7 +29,7 @@ function boats(cur = {idx: null, all: []}, action = {}) {
     case SET_CURRENT_BOAT: {
       const all = cur.all;
       return Object.assign({}, cur,
-        {idx: all.findIndex(b => b.path === action.payload.path)});
+        {idx: all.findIndex(b => b.path === action.payload)});
     }
     case CHANGE_BOAT: {
       let all = cur.all,
@@ -44,7 +45,17 @@ function boats(cur = {idx: null, all: []}, action = {}) {
   }
 }
 
+function nav(cur = {pageState: 'default'}, action = {}) {
+  switch(action.type) {
+    case NAV_SHOW_PAGE_STATE:
+      return Object.assign({}, cur, {pageState: action.payload});
+    default:
+      return cur;
+  }
+}
+
 export default createStore(combineReducers({
   auth,
-  boats
+  boats,
+  nav
 }), applyMiddleware(reduxLogger, reduxThunk));

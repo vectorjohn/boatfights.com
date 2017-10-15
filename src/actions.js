@@ -1,43 +1,25 @@
 
-export const RECEIVE_BOATS = 'RECEIVE_BOATS';
-export function receiveBoats(boats) {
-  return {
-    type: RECEIVE_BOATS,
-    payload: boats
-  }
+function standardAction(type, buildPayload = x => x) {
+  return payload => ({type, payload: buildPayload(payload)})
 }
+
+export const RECEIVE_BOATS = 'RECEIVE_BOATS';
+export const receiveBoats = standardAction(RECEIVE_BOATS);
 
 export const RECEIVE_AUTH = 'RECEIVE_AUTH';
-function receiveAuth(auth) {
-  return {
-    type: RECEIVE_AUTH,
-    payload: auth
-  }
-}
+export const receiveAuth = standardAction(RECEIVE_AUTH);
 
 export const AUTH_FAILURE = 'AUTH_FAILURE';
-function authFailure(resp) {
-  return {
-    type: AUTH_FAILURE,
-    payload: resp
-  };
-}
+export const authFailure = standardAction(AUTH_FAILURE);
 
 export const SET_CURRENT_BOAT = 'SET_CURRENT_BOAT';
-export function setCurrentBoat(path) {
-  return {
-    type: SET_CURRENT_BOAT,
-    payload: {path}
-  }
-}
+export const setCurrentBoat = standardAction(SET_CURRENT_BOAT);
 
 export const CHANGE_BOAT = 'CHANGE_BOAT';
-export function changeBoat(change) {
-  return {
-    type: CHANGE_BOAT,
-    payload: {change}
-  }
-}
+export const changeBoat = standardAction(CHANGE_BOAT, change => ({change}));
+
+export const NAV_SHOW_PAGE_STATE = 'NAV_SHOW_PAGE_STATE';
+export const navShowUpload = standardAction(NAV_SHOW_PAGE_STATE);
 
 export function submitAuth(form) {
   return (dispatch) =>
