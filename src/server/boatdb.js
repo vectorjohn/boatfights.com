@@ -36,14 +36,18 @@ function writeDb(root, db) {
 function addBoat(root, filePath, boatRecord) {
 	return Promise.all([hashAndLoadFile(filePath), readDb(root)])
 		.then(([{hash, data}, db]) => {
+			if (db.images.length > 1000) {
+				//TODO: lazy hack, because this file system based DB and lack of security might provoke too many boats.
+				throw new Error('Too many boats');
+			}
 			const newPath = [hash.substr(0, 2), hash.substr(2, 2), hash.substr(4)];
-			
+
 			newPath.reduce((acc, cur) => {
 				if (acc.length === 0) return [path.join(root, cur)];
 				return acc.concat([path.join(acc[acc.length-1], cur)]);
 			}, []).forEach((path) => {
 				try {
-					fs.mkdirSync(path);	
+					fs.mkdirSync(path);
 				} catch (ex) {
 					if (ex.code !== 'EEXIST')
 						throw ex;

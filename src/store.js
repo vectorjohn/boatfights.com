@@ -7,7 +7,12 @@ import {
   AUTH_FAILURE,
   SET_CURRENT_BOAT,
   CHANGE_BOAT,
-  NAV_SHOW_PAGE_STATE
+  NAV_SHOW_PAGE_STATE,
+  BOAT_FORM_CHANGE,
+  BEGIN_SUBMIT_BOAT,
+  COMPLETE_SUBMIT_BOAT,
+  RESET_BOAT_FORM,
+  MOD_BOAT_FORM
 } from './actions';
 
 function auth(cur = {}, action = {}) {
@@ -40,6 +45,12 @@ function boats(cur = {idx: null, all: []}, action = {}) {
       }
       return Object.assign({}, cur, {idx: next});
     }
+    case COMPLETE_SUBMIT_BOAT:
+      //add the new boat to the list, and show it.
+      return Object.assign({}, cur, {
+        all: cur.all.concat([action.payload]),
+        idx: cur.all.length
+      })
     default:
       return cur;
   }
@@ -54,8 +65,26 @@ function nav(cur = {pageState: 'default'}, action = {}) {
   }
 }
 
+const defaultBoatForm = {complete: false};
+function boatForm(cur = defaultBoatForm, action = {}) {
+  switch (action.type) {
+    case RESET_BOAT_FORM:
+      return defaultBoatForm;
+    case COMPLETE_SUBMIT_BOAT:
+      return Object.assign({}, cur, {complete: true});
+    case BEGIN_SUBMIT_BOAT:
+      return Object.assign({}, cur, {disabled: true});
+    case MOD_BOAT_FORM:
+      return Object.assign({}, cur, action.payload);
+    case BOAT_FORM_CHANGE:
+    default:
+      return cur;
+  }
+}
+
 export default createStore(combineReducers({
   auth,
   boats,
-  nav
+  nav,
+  boatForm
 }), applyMiddleware(reduxLogger, reduxThunk));
