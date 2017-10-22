@@ -16,7 +16,8 @@ function mapDispatchToProps(dispatch) {
           dispatch(navShowHome());
           dispatch(resetBoatForm());
         });
-      }
+      },
+    onCancel: () => dispatch(navShowHome())
   };
 }
 

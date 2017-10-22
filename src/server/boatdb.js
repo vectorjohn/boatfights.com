@@ -61,7 +61,7 @@ function addBoat(root, filePath, boatRecord) {
 
 			const newRecord = Object.assign({}, boatRecord, {path: dbPath});
 			db.images.push(newRecord);
-			rescanDb(root);
+			writeDb(root, db);
 			return newRecord;
 		})
 }
@@ -83,6 +83,18 @@ function hashAndLoadFile(path) {
 function readDb(root) {
 	return readDbAsJson(root)
 		.then(JSON.parse);
+}
+
+function writeDb(root, db) {
+	return new Promise((res, rej) => {
+		fs.writeFile(getDbIndexPath(root), JSON.stringify(db), 'utf8', function(err) {
+			if (err) {
+				rej(err);
+				return;
+			}
+			res();
+		});
+	})
 }
 
 function getDbIndexPath(root) {

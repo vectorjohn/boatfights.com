@@ -61,7 +61,10 @@ app.post('/rescan', function(req, res) {
 
 app.post('/boats', upload.single('boat'), function(req, res) {
 	boatdb.addBoat(boatRoot, req.file.path, boatdb.createBoat(
-		null, req.file.filename, req.file.filename, null
+		null,
+		req.file.filename,
+		req.body.title || req.file.filename,
+		req.body.description
 	)).then((boat) => {
 		res.json(boat);
 	})

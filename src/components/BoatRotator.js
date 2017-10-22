@@ -6,11 +6,13 @@ export default ({boat, onNext, onPrev}) => {
   }
 
   return (
-    <div>
+    <div className="BoatRotator">
       <button onClick={onPrev}>&lt;</button>
       <button onClick={onNext}>&gt;</button>
-      <br/>
-      <img id="daboat" alt={boat.title} title={boat.title} src={boat.path} />
+      <figure>
+        <img id="daboat" alt={boat.title} title={boat.title} src={boat.path} />
+        <figcaption><strong>{boat.title}</strong> {boat.description}</figcaption>
+      </figure>
     </div>
   );
 }

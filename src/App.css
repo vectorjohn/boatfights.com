@@ -1,4 +1,4 @@
-.App {
+.BoatRotator {
   text-align: center;
 }
 
@@ -20,6 +20,7 @@
 
 .App-header h1 {
   margin: 0;
+  text-align: center;
 }
 
 .App-intro {
