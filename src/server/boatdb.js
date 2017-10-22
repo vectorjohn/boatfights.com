@@ -56,11 +56,19 @@ function addBoat(root, filePath, boatRecord) {
 
 			const dbPath = path.join.apply(path, newPath.concat(path.basename(filePath)));
 			const finalPath = path.join.apply(path, [root].concat(dbPath));
+
+			const newRecord = Object.assign({}, boatRecord, {path: dbPath});
+			const existing = db.images.find(i => i.path === newRecord.path);
+			if (existing) {
+				Object.assign(existing, newRecord)
+			}
+			else {
+				db.images.push(newRecord);
+			}
+			
 			fs.writeFile(finalPath, data);
 			//fs.rename(filePath, finalPath)
 
-			const newRecord = Object.assign({}, boatRecord, {path: dbPath});
-			db.images.push(newRecord);
 			writeDb(root, db);
 			return newRecord;
 		})
