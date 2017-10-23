@@ -38,6 +38,7 @@ function writeDb(root, db) {
 }
 
 function addBoat(root, filePath, boatRecord) {
+	console.log('addBoat', filePath, boatRecord);
 	return Promise.all([hashAndLoadFile(filePath), readDb(root)])
 		.then(([{hash, data}, db]) => {
 			if (db.images.length > 1000) {

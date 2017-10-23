@@ -61,6 +61,7 @@ app.post('/rescan', function(req, res) {
 
 app.post('/boats', upload.single('boat'), function(req, res) {
 	const path = req.file ? req.file.path : req.body.url;
+	console.log('post at boats', path);
 	if (!path) {
 		return res.status(400)
 			.json({
@@ -75,7 +76,7 @@ app.post('/boats', upload.single('boat'), function(req, res) {
 		filename,
 		req.body.title || filename,
 		req.body.description,
-		req.file.path ? null : req.body.url
+		req.file ? null : req.body.url
 	)).then((boat) => {
 		res.json(boat);
 	})
