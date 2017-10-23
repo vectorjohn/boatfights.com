@@ -47,5 +47,5 @@ export default ({onSubmitBoat, onCancel, disabled}) =>
     <input type="submit" className="btn btn-primary"
       value="Boat Me"
       onClick={nodefault(ev => onSubmitBoat(ev.target.form))} />
-    <button className="btn btn-default" onClick={onCancel}>Cancel</button>
+    <button className="btn btn-default" onClick={nodefault(onCancel)}>Cancel</button>
   </form>
