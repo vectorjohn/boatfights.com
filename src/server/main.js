@@ -60,10 +60,20 @@ app.post('/rescan', function(req, res) {
 });
 
 app.post('/boats', upload.single('boat'), function(req, res) {
-	boatdb.addBoat(boatRoot, req.file.path, boatdb.createBoat(
+	const path = req.file ? req.file.path : req.body.url;
+	if (!path) {
+		return res.status(400)
+			.json({
+				error: 'must supply a file (boat parameter) or a URL (url parameter)'
+			});
+	}
+
+	const filename = req.file ? req.file.filename : 'boat';
+	
+	boatdb.addBoat(boatRoot, path, boatdb.createBoat(
 		null,
-		req.file.filename,
-		req.body.title || req.file.filename,
+		filename,
+		req.body.title || filename,
 		req.body.description
 	)).then((boat) => {
 		res.json(boat);

@@ -1,7 +1,10 @@
 const path = require('path'),
 	fs = require('fs'),
+	concatStream = require('concat-stream'),
 	crypto = require('crypto'),
-	readdir = require('recursive-readdir');
+	readdir = require('recursive-readdir'),
+	http = require('http'),
+	https = require('https');
 
 const fileTypeRE = /\.(jpg|jpeg|png|gif)$/;
 
@@ -28,6 +31,7 @@ function writeDb(root, db) {
 				rej(err);
 				return;
 			}
+			console.log('creating new boat record: ', newRecord);
 			res(null);
 		})
 	});
@@ -59,13 +63,14 @@ function addBoat(root, filePath, boatRecord) {
 
 			const newRecord = Object.assign({}, boatRecord, {path: dbPath});
 			const existing = db.images.find(i => i.path === newRecord.path);
+			console.log('creating new boat record: ', newRecord);
 			if (existing) {
 				Object.assign(existing, newRecord)
 			}
 			else {
 				db.images.push(newRecord);
 			}
-			
+
 			fs.writeFile(finalPath, data);
 			//fs.rename(filePath, finalPath)
 
@@ -75,17 +80,33 @@ function addBoat(root, filePath, boatRecord) {
 }
 
 function hashAndLoadFile(path) {
+	console.log('path', path);
 	const hash = crypto.createHash('sha1');
 	return new Promise((res, rej) => {
-		fs.readFile(path, (err, data) => {
-			if (err) {
-				rej(err);
-				return;
-			}
-			hash.update(data);
-			res({hash: hash.digest('hex'), data});
-		})
-	});
+		if (path.substr(0, 'http://'.length) === 'http://') {
+			http.get(path, resp => {
+				console.log('what type? ', resp.headers['content-type']);
+				res(resp);
+			}).on('error', rej);
+		} else if (path.substr(0, 'https://'.length) === 'https://') {
+			https.get(path, resp => {
+				console.log('what type (https)? ', resp.headers['content-type']);
+				res(resp);
+			}).on('error', rej);
+		}
+		else {
+			//TODO: surely this can error. Not sure how it does it, probably throw?
+			res(fs.createReadStream(path));
+		}
+	}).then(fileStream => new Promise((res, rej) => {
+
+		fileStream.on('error', rej);
+
+		fileStream.pipe(concatStream(buf => {
+			hash.update(buf);
+			res({hash: hash.digest('hex'), data: buf});
+		}));
+	}));
 }
 
 function readDb(root) {
