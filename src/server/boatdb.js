@@ -177,8 +177,8 @@ function readDbAsJson(root) {
 	});
 }
 
-function createBoat(path, name, title, description = null) {
-	return {path, name, title, description, timestamp: new Date()};
+function createBoat(path, name, title, description = null, source = null) {
+	return {path, name, title, description, source, timestamp: new Date()};
 }
 
 module.exports = {

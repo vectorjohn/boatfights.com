@@ -69,12 +69,13 @@ app.post('/boats', upload.single('boat'), function(req, res) {
 	}
 
 	const filename = req.file ? req.file.filename : 'boat';
-	
+
 	boatdb.addBoat(boatRoot, path, boatdb.createBoat(
 		null,
 		filename,
 		req.body.title || filename,
-		req.body.description
+		req.body.description,
+		req.file.path ? null : req.body.url
 	)).then((boat) => {
 		res.json(boat);
 	})
