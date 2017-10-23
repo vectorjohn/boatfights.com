@@ -20,7 +20,7 @@ function App({nav, onNext, onPrev, onShowUpload}) {
   return (
     <div className="App">
       <div className="App-header container-fluid">
-        <div className="col-sm-offset-2 col-sm-8">
+        <div className="col-sm-offset-2 col-sm-8 page-header">
           <h1>Boat Fights!</h1>
         </div>
         <div className="col-sm-2">
