@@ -44,7 +44,7 @@ app.get('/hi', function (req, res) {
 
 app.get('/boats.json', function(req, res) {
 	boatdb
-		.readDbAsJson(boatRoot)
+		.readDbTableAsJson(boatRoot, 'boats')
 		.then(function(text) {
 			res.end(text);
 		}, (err) => {throw err})
