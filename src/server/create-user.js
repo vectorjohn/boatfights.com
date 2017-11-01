@@ -27,25 +27,39 @@ const rl = readline.createInterface({
   terminal: true
 });
 
-rl.question('Password: ', function(password) {
-  console.log('\nPassword is ' + password);
-  rl.close();
+new Promise((res, rej) => {
+  rl.question('Password:', res);
+}).then(pass1 => {
 
-  Promise.all([db.readDbTable(userdb, 'auth'), db.createUser(username, password)])
-    .then(([udb, u]) => {
-      const existing = udb.users.find(eu => eu.username === username);
-      if (existing) {
-        Object.assign(existing, u);
-      } else {
-        udb.users.push(u);
-      }
-      console.log(udb);
-      console.log('User:', u);
-      return db.writeDb(userdb, udb);
-    });
+  mutableStdout.muted = false;
+  mutableStdout.write('\n');
 
+  rl.question('Re-type Password: ', function(pass2) {
+    mutableStdout.muted = false;
+    mutableStdout.write('\n');
+    rl.close();
+
+    if (pass1 !== pass2) {
+      mutableStdout.write('Passwords did not match. Try again.\n\n');
+      return;
+    }
+
+    Promise.all([db.readDbTable(userdb, 'auth'), db.createUser(username, pass1)])
+      .then(([udb, u]) => {
+        const existing = udb.users.find(eu => eu.username === username);
+        if (existing) {
+          Object.assign(existing, u);
+        } else {
+          udb.users.push(u);
+        }
+        console.log(udb);
+        console.log('User:', u);
+        return db.writeDb(userdb, udb);
+      });
+
+  });
+
+  mutableStdout.muted = true;
 });
 
 mutableStdout.muted = true;
-
-console.log(userdb);
