@@ -5,11 +5,14 @@ const fs = require('fs')
 const multer = require('multer');
 const bodyParser = require('body-parser');
 const boatdb = require('./boatdb');
+const auth = require('./auth');
 
 const app = express()
 const tmpDir = path.join(os.tmpdir(), 'boat-tmp-' + Date.now());
 const indexHtml = path.join(__dirname, '..', '..',  'build', 'index.html');
 const boatRoot = process.env.BOATDB || path.join(__dirname, '..', '..', 'boats');
+
+const userdb = boatdb.readDbTable(boatRoot, 'auth');
 
 app.use(express.static(path.join(__dirname, '..', '..',  'build')));
 app.use(express.static(boatRoot));
@@ -35,8 +38,10 @@ const upload = multer({
 	}
 });
 
+/*
 boatdb.rescanDb(boatRoot)
 	.then((db) => console.log(db));
+*/
 
 app.get('/hi', function (req, res) {
   res.send('Hello World!')
@@ -80,6 +85,28 @@ app.post('/boats', upload.single('boat'), function(req, res) {
 		res.json(boat);
 	})
 });
+
+app.post('/login', function(req, res) {
+	userdb.then(db => {
+		const {username, password} = req.body;
+		if (!username || !password) {
+			res.json({error: 'username and password are required'});
+			return;
+		}
+		const user = db.users.find(u => u.username === username) || {salt: '', password: ''};
+		auth.isValidPassword(password, user.password, user.salt)
+			.then(valid => {
+				if (!valid) {
+					res.json({error: "Invalid username or password"});
+					return;
+				}
+				const pubUser = Object.assign({}, user);
+				delete pubUser.password;
+				delete pubUser.salt;
+				res.json({msg: 'You win!', pubUser});
+			})
+	})
+})
 
 app.get('/slfjlsjd/*', function (req, res) {
   res.sendFile(indexHtml)

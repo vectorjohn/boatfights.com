@@ -154,9 +154,11 @@ function writeDb(root, db) {
 	return writeDbTable(root, 'boats', db);
 }
 
+//if root is a path to a json file, use that path
+//otherwise, add table + .json
 function getDbTablePath(root, table) {
-	const base = path.basename(root, '.json');
-	if (base.substr(-('.json'.length) === '.json'))
+	const base = path.basename(root);
+	if (base.substr(-('.json'.length)) === '.json')
 		return root;
 	return path.join(root, table + '.json');
 }
@@ -227,53 +229,19 @@ function createBoat(path, name, title, description = null, source = null) {
 const PERM_POST = 'PERM_POST';
 const PERM_ADMIN = 'PERM_ADMIN';
 
-function createUser(username, password, perms = [PERM_POST]) {
-	return createSalt()
-		.then(salt=> Promise.all([salt, hashPass(password, salt)]))
-		.then(([salt, hash]) => ({
-			username,
-			password: hash.toString('base64'),
-			salt: salt.toString('base64'),
-			perms,
-			timestamp: new Date()
-		}));
+function createUser(username, hash, salt, perms = [PERM_POST]) {
+	return {
+		username,
+		password: hash,
+		salt: salt,
+		perms,
+		timestamp: new Date()
+	}
 }
 
-const PASS_HASH_ITERS = 10000;
-const PASS_LEN = 32;
-function hashPass(password, salt) {
-	return new Promise((res, rej) => {
-		crypto.pbkdf2(password, salt, PASS_HASH_ITERS, PASS_LEN, 'sha512', (err, key) => {
-			if (err) {
-				rej(err);
-				return;
-			}
-			res(key);
-		})
-	});
-}
-
-const SALT_LEN = 32;
-function createSalt() {
-	return new Promise((res, rej) => {
-		crypto.randomBytes(SALT_LEN, (err, buf) => {
-			if (err) {
-				rej(err);
-				return;
-			}
-			res(buf);
-		})
-	})
-}
-
-function isValidPassword(pass, user) {
-	return hashPass(pass, Buffer.from(user.salt, 'base64'))
-		.then(hash => hash.toString('base64') === user.password);
-}
 
 module.exports = {
 	createUser,
-	isValidPassword,
 	readDbTableAsJson,
 	rescanDb,
 	addBoat,

@@ -1,6 +1,7 @@
 #!/usr/bin/env nodejs
 
 const db = require('./boatdb'),
+    auth = require('./auth'),
     readline = require('readline'),
     Writable = require('stream').Writable;
     userdb = process.argv[2],
@@ -44,9 +45,11 @@ new Promise((res, rej) => {
       return;
     }
 
-    Promise.all([db.readDbTable(userdb, 'auth'), db.createUser(username, pass1)])
-      .then(([udb, u]) => {
-        const existing = udb.users.find(eu => eu.username === username);
+
+    Promise.all([db.readDbTable(userdb, 'auth'), auth.hashPassword(pass1)])
+      .then(([udb, authInfo]) => {
+        const u = db.createUser(username, authInfo.hash, authInfo.salt),
+          existing = udb.users.find(eu => eu.username === username);
         if (existing) {
           Object.assign(existing, u);
         } else {
