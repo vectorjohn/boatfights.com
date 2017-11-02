@@ -1,4 +1,28 @@
 const crypto = require('crypto');
+const SUPER_SECRET = 'asdf123';
+const CIPHER_ALG = 'aes-192-cbc';
+const SESSION_TIME_SEC = 90 * 24 * 60 * 60;
+
+function createAuthToken(key, data) {
+    const session = JSON.stringify({
+      k: key,
+      d: data,
+      tl: SESSION_TIME_SEC,
+      ts: new Date()
+    });
+
+    const cipher = crypto.createCipher(CIPHER_ALG, SUPER_SECRET);
+    return cipher.update(session, 'utf8', 'base64')
+      + cipher.final('base64');
+}
+
+function decryptAuthToken(token) {
+  const decipher = crypto.createDecipher(CIPHER_ALG, SUPER_SECRET);
+  const json = decipher.update(token, 'base64', 'utf8')
+    + decipher.final('utf8');
+
+  return JSON.parse(json);
+}
 
 const PASS_HASH_ITERS = 10000;
 const PASS_LEN = 32;
@@ -43,5 +67,7 @@ function hashPassword(password) {
 
 module.exports = {
   hashPassword,
-  isValidPassword
+  isValidPassword,
+  createAuthToken,
+  decryptAuthToken
 }
