@@ -98,6 +98,27 @@ function addBoat(root, filePath, boatRecord) {
 		})
 }
 
+function deleteBoat(root, imgPath) {
+	return readDbTable(root, 'boats')
+		.then(db => {
+			const origImages = db.images;
+			db.images = origImages.filter(i => i.path !== imgPath);
+			if (origImages.length === db.images.length) {
+				return 0;
+			}
+
+			//don't wait for result. If it fails, it's out of the DB at least.
+			fs.unlink(path.join(root, imgPath), err => {
+				if (err) {
+					console.error("Somehow delete failed: ", err);
+				}
+			});
+
+			return writeDbTable(root, 'boats', db)
+				.then(() => origImages.length - db.images.length);
+		})
+}
+
 function hashAndLoadFile(path) {
 	console.log('path', path);
 	const hash = crypto.createHash('sha1');
@@ -245,6 +266,7 @@ module.exports = {
 	readDbTableAsJson,
 	rescanDb,
 	addBoat,
+	deleteBoat,
 	readDb,
 	readDbTable,
 	writeDb,

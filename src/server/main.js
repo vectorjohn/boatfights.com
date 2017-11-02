@@ -59,7 +59,7 @@ app.get('/auth-required', requireAuthMiddleware, function(req, res) {
 	res.json({msg: `Hi ${req.authentication.k}, you found the secrets`});
 });
 
-app.get('/boats.json', function(req, res) {
+app.get(['/boats.json', '/boats'], function(req, res) {
 	boatdb
 		.readDbTableAsJson(boatRoot, 'boats')
 		.then(function(text) {
@@ -96,6 +96,20 @@ app.post('/boats', upload.single('boat'), function(req, res) {
 	)).then((boat) => {
 		res.json(boat);
 	})
+});
+
+app.delete('/boats/:path(*)', requireAuthMiddleware, function(req, res) {
+	console.log("Delete Request: ", req.params.path);
+	boatdb.deleteBoat(boatRoot, req.params.path)
+		.then(n => {
+			if (n) {
+				res.json({msg: 'OK'});
+			}
+			else {
+				res.status(404)
+					.json({msg: "it isn't there... which is what you wanted, right?"});
+			}
+		})
 });
 
 app.post('/login', function(req, res) {
