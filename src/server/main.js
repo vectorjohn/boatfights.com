@@ -47,6 +47,18 @@ app.get('/hi', function (req, res) {
   res.send('Hello World!')
 })
 
+app.get('/auth-optional', authMiddleware, function(req, res) {
+	const a = req.authentication;
+	res.json({
+		msg: a ? 'Authorized' : 'Unauthorized',
+		as: a
+	});
+});
+
+app.get('/auth-required', requireAuthMiddleware, function(req, res) {
+	res.json({msg: `Hi ${req.authentication.k}, you found the secrets`});
+});
+
 app.get('/boats.json', function(req, res) {
 	boatdb
 		.readDbTableAsJson(boatRoot, 'boats')
@@ -103,7 +115,14 @@ app.post('/login', function(req, res) {
 				const pubUser = Object.assign({}, user);
 				delete pubUser.password;
 				delete pubUser.salt;
-				res.json({msg: 'You win!', pubUser});
+
+				const token = auth.createAuthToken(pubUser.username);
+				res.append('auth-token', token);
+				res.json({
+					msg: 'You win!',
+					user: pubUser,
+					token
+				});
 			})
 	})
 })
@@ -121,7 +140,7 @@ app.listen(3000, function () {
 
 function xhrErrorHandler(err, req, res, next) {
 	if (req.xhr || 'always') {
-		res.status(500)
+		res.status(err.status || 500)
 			.json({
 				error: err
 			})
@@ -129,8 +148,44 @@ function xhrErrorHandler(err, req, res, next) {
 		next(err);
 	}
 }
+
 function defaultErrorHandler(err, req, res, next) {
 	res
 		.status(500)
 		.render('error', {error: err});
+}
+
+function authMiddleware(req, res, next) {
+	const authHead = req.get('authorization');
+	req.authentication = null;
+	if (!authHead) {
+		return next();
+	}
+
+	const parts = authHead.split(/ +/);
+	if (parts[0].toLowerCase() !== 'bearer') {
+		return next();
+	}
+
+	try {
+		req.authentication = auth.decryptAuthToken(parts[1]);
+	} catch (ex) {
+		console.log("Invalid auth token: ", parts[1])
+		const err = Error("Invalid authentication token");
+		err.status = 422;
+		throw err;
+	}
+	next();
+}
+
+function requireAuthMiddleware(req, res, next) {
+	authMiddleware(req, res, () => {
+		if (!req.authentication) {
+			const err = Error("Unauthorized");
+			err.status = 401;
+			throw err;
+		}
+
+		next();
+	})
 }

@@ -3,7 +3,7 @@ const SUPER_SECRET = 'asdf123';
 const CIPHER_ALG = 'aes-192-cbc';
 const SESSION_TIME_SEC = 90 * 24 * 60 * 60;
 
-function createAuthToken(key, data) {
+function createAuthToken(key, data = null) {
     const session = JSON.stringify({
       k: key,
       d: data,
