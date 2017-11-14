@@ -59,6 +59,9 @@ function boats(cur = {idx: null, all: []}, action = {}) {
 function nav(cur = {pageState: 'default'}, action = {}) {
   switch(action.type) {
     case NAV_SHOW_PAGE_STATE:
+      if (action.payload === 'login') {
+        return Object.assign({}, cur, {showLogin: true});
+      }
       return Object.assign({}, cur, {pageState: action.payload});
     default:
       return cur;
@@ -82,9 +85,22 @@ function boatForm(cur = defaultBoatForm, action = {}) {
   }
 }
 
-export default createStore(combineReducers({
+const authFetch = (url, options) => {
+  const auth = store.getState().auth;
+  if (!auth.isLoggedIn) {
+    return fetch(url, options);
+  }
+  const headers = options ? {...options.headers} : {};
+  headers.authorization = `Bearer ${auth.token}`;
+
+  return fetch(url, {...options, headers});
+}
+
+const store = createStore(combineReducers({
   auth,
   boats,
   nav,
   boatForm
-}), applyMiddleware(reduxLogger, reduxThunk));
+}), applyMiddleware(reduxLogger, reduxThunk.withExtraArgument(authFetch)));
+
+export default store;

@@ -1,7 +1,8 @@
 import {connect} from 'react-redux';
-import {navShowUpload} from '../actions';
+import {navShowUpload, navShowLogin} from '../actions';
 
 export default connect(state => ({nav: state.nav}),
   dispatch => ({
-    onShowUpload: () => dispatch(navShowUpload())
+    onShowUpload: () => dispatch(navShowUpload()),
+    onShowLogin: () => dispatch(navShowLogin())
   }));
