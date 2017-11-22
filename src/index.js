@@ -7,9 +7,10 @@ import registerServiceWorker from './registerServiceWorker';
 import store from './store';
 import {receiveBoats, setCurrentBoat, receiveAuth} from './actions';
 import canEvenNav from './connectors/canEvenNav';
+import hasAuth from './connectors/hasAuth';
 import mockBoats from './mocks/boats.json';
 
-const App = canEvenNav(AppBase);
+const App = hasAuth(canEvenNav(AppBase));
 
 if (sessionStorage.getItem('auth')) {
 	store.dispatch(receiveAuth(JSON.parse(sessionStorage.getItem('auth'))));

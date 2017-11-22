@@ -2,12 +2,12 @@ import React from 'react';
 import BoatRotator from './components/BoatRotator';
 import Uploader from './components/Uploader';
 import Login from './components/Login';
-import hasCurrentBoat from './connectors/hasCurrentBoat';
+import hasCurrentBoat from './connectors/hasCurrentBoat'
 import './App.css';
 
 const CurrentBoatRotator = hasCurrentBoat(BoatRotator);
 
-function App({nav, onNext, onPrev, onShowUpload, onShowLogin}) {
+function App({nav, onNext, onPrev, onShowUpload, onShowLogin, onDeleteBoat}) {
   let CurrentThing = null;
 
   switch (nav.pageState) {
@@ -41,7 +41,7 @@ function App({nav, onNext, onPrev, onShowUpload, onShowLogin}) {
         </ShowIf>
       </div>
       <div className="App-intro">
-	      <CurrentThing />
+	      <CurrentThing onDelete={onDeleteBoat} />
       </div>
     </div>
   );

@@ -86,3 +86,27 @@ export function showGrowl(message, timeout = 10000) {
     setTimeout(() => dispatch(hideGrowl()), timeout);
   }
 }
+
+export const DELETE_BOAT_REQUESTED = 'DELETE_BOAT_REQUESTED';
+const deleteboatRequested = standardAction(DELETE_BOAT_REQUESTED);
+export const DELETE_BOAT_SUCCESS = 'DELETE_BOAT_SUCCESS';
+const deleteBoatSuccess = standardAction(DELETE_BOAT_SUCCESS);
+
+export function deleteBoat(boat) {
+  return (dispatch, getState, authFetch) => {
+    dispatch(deleteboatRequested(boat));
+    return authFetch(`/boats/${boat.path}`, {method: 'DELETE'})
+      .then(throwIfError)
+      .then(res => res.json())
+      //TODO: look up how to check the http status code and dispatch a fail for fails.
+      .then(json => deleteBoatSuccess({boat, json}))
+      .then(dispatch);
+  }
+}
+
+function throwIfError(res) {
+  if (res.status > 399) {
+    throw Error(res.statusText);
+  }
+  return res;
+}

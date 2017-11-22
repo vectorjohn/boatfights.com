@@ -12,7 +12,8 @@ import {
   BEGIN_SUBMIT_BOAT,
   COMPLETE_SUBMIT_BOAT,
   RESET_BOAT_FORM,
-  MOD_BOAT_FORM
+  MOD_BOAT_FORM,
+  DELETE_BOAT_SUCCESS
 } from './actions';
 
 function auth(cur = {}, action = {}) {
@@ -51,6 +52,9 @@ function boats(cur = {idx: null, all: []}, action = {}) {
         all: cur.all.concat([action.payload]),
         idx: cur.all.length
       })
+    case DELETE_BOAT_SUCCESS:
+      return {...cur,
+        all: cur.all.filter(b => b.path !== action.payload.boat.path)};
     default:
       return cur;
   }
