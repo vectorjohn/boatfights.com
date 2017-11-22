@@ -1,12 +1,13 @@
 import React from 'react';
 import BoatRotator from './components/BoatRotator';
 import Uploader from './components/Uploader';
-import hasCurrentBoat from './connectors/hasCurrentBoat';
+import Login from './components/Login';
+import hasCurrentBoat from './connectors/hasCurrentBoat'
 import './App.css';
 
 const CurrentBoatRotator = hasCurrentBoat(BoatRotator);
 
-function App({nav, onNext, onPrev, onShowUpload}) {
+function App({nav, onNext, onPrev, onShowUpload, onShowLogin, onDeleteBoat}) {
   let CurrentThing = null;
 
   switch (nav.pageState) {
@@ -15,6 +16,10 @@ function App({nav, onNext, onPrev, onShowUpload}) {
       break;
     default:
       CurrentThing = CurrentBoatRotator;
+  }
+
+  if (nav.showLogin) {
+
   }
 
   return (
@@ -27,15 +32,23 @@ function App({nav, onNext, onPrev, onShowUpload}) {
           <nav>
             <ul className="nav navbar-nav">
               <li><a className="btn btn-default" href="#submit-boat" onClick={onShowUpload}>Submit Boat Fights</a></li>
+              <li><a className="btn btn-secondary" href="#login" onClick={onShowLogin}>Login</a></li>
             </ul>
           </nav>
         </div>
+        <ShowIf test={nav.showLogin}>
+          <Login />
+        </ShowIf>
       </div>
       <div className="App-intro">
-	      <CurrentThing />
+	      <CurrentThing onDelete={onDeleteBoat} />
       </div>
     </div>
   );
+}
+
+function ShowIf({test=false, children=null}) {
+  return test ? <div>{children}</div> : null;
 }
 
 export default App;

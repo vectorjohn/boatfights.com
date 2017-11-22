@@ -12,7 +12,8 @@ import {
   BEGIN_SUBMIT_BOAT,
   COMPLETE_SUBMIT_BOAT,
   RESET_BOAT_FORM,
-  MOD_BOAT_FORM
+  MOD_BOAT_FORM,
+  DELETE_BOAT_SUCCESS
 } from './actions';
 
 function auth(cur = {}, action = {}) {
@@ -51,6 +52,9 @@ function boats(cur = {idx: null, all: []}, action = {}) {
         all: cur.all.concat([action.payload]),
         idx: cur.all.length
       })
+    case DELETE_BOAT_SUCCESS:
+      return {...cur,
+        all: cur.all.filter(b => b.path !== action.payload.boat.path)};
     default:
       return cur;
   }
@@ -59,6 +63,9 @@ function boats(cur = {idx: null, all: []}, action = {}) {
 function nav(cur = {pageState: 'default'}, action = {}) {
   switch(action.type) {
     case NAV_SHOW_PAGE_STATE:
+      if (action.payload === 'login') {
+        return Object.assign({}, cur, {showLogin: true});
+      }
       return Object.assign({}, cur, {pageState: action.payload});
     default:
       return cur;
@@ -82,9 +89,22 @@ function boatForm(cur = defaultBoatForm, action = {}) {
   }
 }
 
-export default createStore(combineReducers({
+const authFetch = (url, options) => {
+  const auth = store.getState().auth;
+  if (!auth.isLoggedIn) {
+    return fetch(url, options);
+  }
+  const headers = options ? {...options.headers} : {};
+  headers.authorization = `Bearer ${auth.token}`;
+
+  return fetch(url, {...options, headers});
+}
+
+const store = createStore(combineReducers({
   auth,
   boats,
   nav,
   boatForm
-}), applyMiddleware(reduxLogger, reduxThunk));
+}), applyMiddleware(reduxLogger, reduxThunk.withExtraArgument(authFetch)));
+
+export default store;

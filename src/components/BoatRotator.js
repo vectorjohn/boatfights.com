@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default ({boat, onNext, onPrev}) => {
+export default ({boat, onNext, onPrev, onDelete}) => {
   if (!boat) {
     return null;
   }
@@ -13,6 +13,17 @@ export default ({boat, onNext, onPrev}) => {
         <img id="daboat" alt={boat.title} title={boat.title} src={boat.path} />
         <figcaption><strong>{boat.title}</strong> {boat.description}</figcaption>
       </figure>
+      <DeleteButton onDelete={() => onDelete(boat)} />
     </div>
   );
+}
+
+const DeleteButton = ({onDelete}) => {
+  if (!onDelete) {
+    return null;
+  }
+
+  return (
+    <button type="button" onClick={onDelete}>Delete</button>
+  )
 }

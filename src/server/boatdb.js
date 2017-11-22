@@ -8,12 +8,30 @@ const path = require('path'),
 
 const fileTypeRE = /\.(jpg|jpeg|png|gif)$/;
 
-function createEmptyDb() {
-	return {
-		updated: null,
-		genTime: null,
-		images: []
-	};
+const dbTables = {
+	boats: {
+		empty: {
+			updated: null,
+			genTime: null,
+			images: []
+		}
+	},
+	auth: {
+		empty: {
+			updated: null,
+			users: []
+		}
+	},
+	pending: {
+		empty: {
+			updated: null,
+			images: []
+		}
+	}
+}
+
+function createEmptyDbTable(table) {
+	return dbTables[table].empty;
 }
 
 function boatsByPath(db) {
@@ -25,6 +43,7 @@ function boatsByPath(db) {
 }
 
 function writeDb(root, db) {
+	db.updated = new Date();
 	return new Promise(function(res, rej) {
 		fs.writeFile(getDbIndexPath(root), JSON.stringify(db), 'utf8', function(err) {
 			if (err) {
@@ -39,7 +58,7 @@ function writeDb(root, db) {
 
 function addBoat(root, filePath, boatRecord) {
 	console.log('addBoat', filePath, boatRecord);
-	return Promise.all([hashAndLoadFile(filePath), readDb(root)])
+	return Promise.all([hashAndLoadFile(filePath), readDbTable(root, 'boats')])
 		.then(([{hash, data}, db]) => {
 			if (db.images.length > 1000) {
 				//TODO: lazy hack, because this file system based DB and lack of security might provoke too many boats.
@@ -75,8 +94,29 @@ function addBoat(root, filePath, boatRecord) {
 			fs.writeFile(finalPath, data);
 			//fs.rename(filePath, finalPath)
 
-			writeDb(root, db);
+			writeDbTable(root, 'boats', db);
 			return newRecord;
+		})
+}
+
+function deleteBoat(root, imgPath) {
+	return readDbTable(root, 'boats')
+		.then(db => {
+			const origImages = db.images;
+			db.images = origImages.filter(i => i.path !== imgPath);
+			if (origImages.length === db.images.length) {
+				return 0;
+			}
+
+			//don't wait for result. If it fails, it's out of the DB at least.
+			fs.unlink(path.join(root, imgPath), err => {
+				if (err) {
+					console.error("Somehow delete failed: ", err);
+				}
+			});
+
+			return writeDbTable(root, 'boats', db)
+				.then(() => origImages.length - db.images.length);
 		})
 }
 
@@ -110,14 +150,15 @@ function hashAndLoadFile(path) {
 	}));
 }
 
-function readDb(root) {
-	return readDbAsJson(root)
-		.then(JSON.parse);
+function readDbTable(root, table) {
+		return readDbTableAsJson(root, table)
+			.then(JSON.parse);
 }
 
-function writeDb(root, db) {
+function writeDbTable(root, table, db) {
+	db.updated = new Date();
 	return new Promise((res, rej) => {
-		fs.writeFile(getDbIndexPath(root), JSON.stringify(db), 'utf8', function(err) {
+		fs.writeFile(getDbTablePath(root, table), JSON.stringify(db), 'utf8', function(err) {
 			if (err) {
 				rej(err);
 				return;
@@ -127,15 +168,40 @@ function writeDb(root, db) {
 	})
 }
 
-function getDbIndexPath(root) {
-	return path.join(root, 'boats.json');
+function readDb(root) {
+	return readDbTable(root, 'boats');
 }
 
+function writeDb(root, db) {
+	return writeDbTable(root, 'boats', db);
+}
+
+//if root is a path to a json file, use that path
+//otherwise, add table + .json
+function getDbTablePath(root, table) {
+	const base = path.basename(root);
+	if (base.substr(-('.json'.length)) === '.json')
+		return root;
+	return path.join(root, table + '.json');
+}
+function getDbIndexPath(root) {
+	return getDbTablePath(root, 'boats');
+}
+
+function getDbAuthPath(root) {
+	return getDbTablePath(root, 'auth');
+}
+
+function getDbPendingPath(root) {
+	return getDbTablePath(root, 'pending');
+}
+
+
 function rescanDb(root) {
-	const newDb = createEmptyDb();
+	const newDb = createEmptyDbTable('boats');
 	const startTime = new Date();
 
-	return readDb(root)
+	return readDbTable(root, 'boats')
 		.then(function(db) {
 			return new Promise(function(res, rej) {
 				readdir(root, function(err, files) {
@@ -157,17 +223,17 @@ function rescanDb(root) {
 
 			newDb.updated = new Date();
 			newDb.genTime = (+newDb.updated) - startTime;
-			return writeDb(root, newDb)
+			return writeDbTable(root, 'boats', newDb)
 				.then(() => newDb);
 		});
 }
 
-function readDbAsJson(root) {
+function readDbTableAsJson(root, table) {
 	return new Promise(function(res, rej) {
-		fs.readFile(getDbIndexPath(root), 'utf8', function(err, data) {
+		fs.readFile(getDbTablePath(root, table), 'utf8', function(err, data) {
 			if (err) {
 				if (err.code === 'ENOENT') {
-					res(JSON.stringify(createEmptyDb()));
+					res(JSON.stringify(createEmptyDbTable(table)));
 					return;
 				}
 				rej(err);
@@ -182,10 +248,29 @@ function createBoat(path, name, title, description = null, source = null) {
 	return {path, name, title, description, source, timestamp: new Date()};
 }
 
+const PERM_POST = 'PERM_POST';
+const PERM_ADMIN = 'PERM_ADMIN';
+
+function createUser(username, hash, salt, perms = [PERM_POST]) {
+	return {
+		username,
+		password: hash,
+		salt: salt,
+		perms,
+		timestamp: new Date()
+	}
+}
+
+
 module.exports = {
-	readDbAsJson,
+	createUser,
+	readDbTableAsJson,
 	rescanDb,
 	addBoat,
+	deleteBoat,
+	readDb,
+	readDbTable,
 	writeDb,
+	writeDbTable,
 	createBoat
 }
