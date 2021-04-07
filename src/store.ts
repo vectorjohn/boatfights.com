@@ -37,36 +37,44 @@ type BoatState = {
 }
 
 function boats(cur: BoatState = {idx: 0, all: []}, action: Action = {}) {
-  switch (action.type) {
-    case RECEIVE_BOATS:
-      return Object.assign({}, cur,
-        {all: action.payload.images, idx: 0});
-    case SET_CURRENT_BOAT: {
-      const all = cur.all;
-      return Object.assign({}, cur,
-        {idx: all.findIndex(b => b.path === action.payload)});
-    }
-    case CHANGE_BOAT: {
-      let all = cur.all,
-        len = all.length,
-        next = (cur.idx + action.payload.change) % len;
-      if (next < 0) {
-        next = len + next;
+  const getNextState = () => {
+    switch (action.type) {
+      case RECEIVE_BOATS:
+        return Object.assign({}, cur,
+          {all: action.payload.images, idx: 0});
+      case SET_CURRENT_BOAT: {
+        const all = cur.all;
+        return Object.assign({}, cur,
+          {idx: all.findIndex(b => b.path === action.payload)});
       }
-      return Object.assign({}, cur, {idx: next});
+      case CHANGE_BOAT: {
+        let all = cur.all,
+          len = all.length,
+          next = (cur.idx + action.payload.change) % len;
+        if (next < 0) {
+          next = len + next;
+        }
+        return Object.assign({}, cur, {idx: next});
+      }
+      case COMPLETE_SUBMIT_BOAT:
+        //add the new boat to the list, and show it.
+        return Object.assign({}, cur, {
+          all: cur.all.concat([action.payload]),
+          idx: cur.all.length
+        })
+      case DELETE_BOAT_SUCCESS:
+        return {...cur,
+          all: cur.all.filter(b => b.path !== action.payload.boat.path)};
+      default:
+        return cur;
     }
-    case COMPLETE_SUBMIT_BOAT:
-      //add the new boat to the list, and show it.
-      return Object.assign({}, cur, {
-        all: cur.all.concat([action.payload]),
-        idx: cur.all.length
-      })
-    case DELETE_BOAT_SUCCESS:
-      return {...cur,
-        all: cur.all.filter(b => b.path !== action.payload.boat.path)};
-    default:
-      return cur;
   }
+
+  const next = getNextState()
+  if (next.idx !== cur.idx) {
+    window.location.hash = next.all[next.idx].path
+  }
+  return next
 }
 
 function nav(cur = {pageState: 'default'}, action: Action = {}) {
