@@ -12,16 +12,24 @@ import mockBoats from './mocks/boats.json';
 
 const App = hasAuth(canEvenNav(AppBase));
 
-if (sessionStorage.getItem('auth')) {
-	store.dispatch(receiveAuth(JSON.parse(sessionStorage.getItem('auth'))));
+const auth = sessionStorage.getItem('auth')
+if (auth) {
+	store.dispatch(receiveAuth(JSON.parse(auth)));
 }
 
 store.dispatch((dispatch, _, authFetch) => {
 	const boatReq = process.env.NODE_ENV === 'development' ? Promise.resolve(mockBoats)
 		: authFetch('/boats.json').then(r => r.json())
-	boatReq.then(json => {
+	boatReq.then((json: {images: {path: string}[]}) => {
 		store.dispatch(receiveBoats(json));
-		store.dispatch(setCurrentBoat(json.images[Math.floor(Math.random() * json.images.length)].path));
+		let initialBoat = json.images[Math.floor(Math.random() * json.images.length)]
+		if (window.location.hash) {
+			const findPath = window.location.hash.substr(1)
+			const urlBoat = json.images.find(image => image.path === findPath)
+			console.log('LOOKING FOR BOAT', window.location.hash, "found: ", urlBoat)
+			initialBoat = urlBoat || initialBoat
+		}
+		store.dispatch(setCurrentBoat(initialBoat.path));
 	});
 })
 

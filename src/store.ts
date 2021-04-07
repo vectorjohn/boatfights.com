@@ -98,7 +98,7 @@ function boatForm(cur = defaultBoatForm, action: Action = {}) {
   }
 }
 
-const authFetch = (url: string, options: any) => {
+const authFetch = (url: string, options?: any) => {
   const auth = store.getState().auth;
   if (!auth.isLoggedIn) {
     return fetch(url, options);
