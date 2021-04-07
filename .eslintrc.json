@@ -1,0 +1,10 @@
+{
+    "extends": ["react-app"],
+    "plugins": ["react", "@typescript-eslint"],
+    "overrides": [
+        {
+            "files": ["**/*.ts?(x)"],
+            "parser": "@typescript-eslint/parser"
+        }
+    ]
+}

@@ -7,7 +7,7 @@ import './App.css';
 
 const CurrentBoatRotator = hasCurrentBoat(BoatRotator);
 
-function App({nav, onNext, onPrev, onShowUpload, onShowLogin, onDeleteBoat}) {
+function App({nav, onNext, onPrev, onShowUpload, onShowLogin, onDeleteBoat}: any) {
   let CurrentThing = null;
 
   switch (nav.pageState) {
@@ -47,7 +47,7 @@ function App({nav, onNext, onPrev, onShowUpload, onShowLogin, onDeleteBoat}) {
   );
 }
 
-function ShowIf({test=false, children=null}) {
+function ShowIf({test=false, children = null as any}) {
   return test ? <div>{children}</div> : null;
 }
 

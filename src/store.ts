@@ -16,7 +16,11 @@ import {
   DELETE_BOAT_SUCCESS
 } from './actions';
 
-function auth(cur = {}, action = {}) {
+type Action = {
+  type?: string,
+  payload?: any
+}
+function auth(cur = {}, action: Action = {}) {
   switch (action.type) {
     case RECEIVE_AUTH:
       return Object.assign({}, action.payload, {isLoggedIn: true});
@@ -27,11 +31,16 @@ function auth(cur = {}, action = {}) {
   }
 }
 
-function boats(cur = {idx: null, all: []}, action = {}) {
+type BoatState = {
+  idx: number,
+  all: any[]
+}
+
+function boats(cur: BoatState = {idx: 0, all: []}, action: Action = {}) {
   switch (action.type) {
     case RECEIVE_BOATS:
       return Object.assign({}, cur,
-        {all: action.payload.images, idx: null});
+        {all: action.payload.images, idx: 0});
     case SET_CURRENT_BOAT: {
       const all = cur.all;
       return Object.assign({}, cur,
@@ -60,7 +69,7 @@ function boats(cur = {idx: null, all: []}, action = {}) {
   }
 }
 
-function nav(cur = {pageState: 'default'}, action = {}) {
+function nav(cur = {pageState: 'default'}, action: Action = {}) {
   switch(action.type) {
     case NAV_SHOW_PAGE_STATE:
       if (action.payload === 'login') {
@@ -73,7 +82,7 @@ function nav(cur = {pageState: 'default'}, action = {}) {
 }
 
 const defaultBoatForm = {complete: false};
-function boatForm(cur = defaultBoatForm, action = {}) {
+function boatForm(cur = defaultBoatForm, action: Action = {}) {
   switch (action.type) {
     case RESET_BOAT_FORM:
       return defaultBoatForm;
@@ -89,7 +98,7 @@ function boatForm(cur = defaultBoatForm, action = {}) {
   }
 }
 
-const authFetch = (url, options) => {
+const authFetch = (url: string, options: any) => {
   const auth = store.getState().auth;
   if (!auth.isLoggedIn) {
     return fetch(url, options);
@@ -100,11 +109,18 @@ const authFetch = (url, options) => {
   return fetch(url, {...options, headers});
 }
 
-const store = createStore(combineReducers({
+const allReducers = {
   auth,
   boats,
   nav,
   boatForm
-}), applyMiddleware(reduxLogger, reduxThunk.withExtraArgument(authFetch)));
+};
+type MyDamnStore = {
+  [K in keyof typeof allReducers]: ReturnType<typeof allReducers[K]>
+}
+const store = createStore(
+  combineReducers<MyDamnStore>(allReducers),
+  applyMiddleware(reduxLogger, reduxThunk.withExtraArgument(authFetch))
+);
 
 export default store;
