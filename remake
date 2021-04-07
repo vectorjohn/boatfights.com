@@ -1,10 +1,10 @@
 #!/bin/bash
 
-yarn install
-yarn build
+npm install
+npm build
 
 #not really needed, unless something in here changes
-#yarn build-container
+#npm build-container
 
 docker stop boatfights
 
