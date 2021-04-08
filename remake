@@ -8,7 +8,7 @@ npm build
 
 docker stop boatfights
 
-./src/server/create-container.sh $PWD $HOME/boats 80
+./src/server/create-container.sh $PWD $HOME/boats 8080
 
 docker start boatfights
 
